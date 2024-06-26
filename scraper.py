@@ -142,10 +142,10 @@ def main():
         print('The process_likers function has been run.')
         process_likers(accounts, cl=Client())
     elif choice == 2:
-        print('')
+        print('The process_comments function has been run.')
         process_comments(accounts, cl=Client())
     elif choice == 3:
-        print('')
+        print('The process_profile function has been run.')
         process_profile(accounts, cl=Client())
 
 
