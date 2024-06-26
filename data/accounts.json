@@ -1,6 +1,14 @@
-{
-    "login": "login",
-    "password": "password",
-    "keyword": "keyword",
-    "postlink": "postlink"
-}
+[
+    {
+        "login": "login1",
+        "password": "password1",
+        "keyword": "keyword1",
+        "postlink": "postlink1"
+    },
+    {
+        "login": "login2",
+        "password": "password2",
+        "keyword": "keyword2",
+        "postlink": "postlink2"
+    }
+]
