@@ -134,19 +134,20 @@ def main():
     filename = 'data/accounts.json'
     accounts = read_accounts_from_file(filename)
 
+
     print("=================================")
     print('Выберите действие:\n 1 - Поиск лайкнувших\n 2 - Поиск комментаторов\n 3 - 1 и 2 пункт (unstable) ')
-    choice = input('Your choice: ')
     print("=================================")
+    choice = int(input('Your choice: '))
     if choice == 1:
         print('The process_likers function has been run.')
-        process_likers(accounts, cl=Client())
+        for account in accounts: process_likers(account, cl=Client())
     elif choice == 2:
         print('The process_comments function has been run.')
-        process_comments(accounts, cl=Client())
+        for account in accounts: process_comments(account, cl=Client())
     elif choice == 3:
         print('The process_profile function has been run.')
-        process_profile(accounts, cl=Client())
+        for account in accounts: process_profile(account, cl=Client())
 
 
 if __name__ == "__main__":
