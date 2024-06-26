@@ -4,7 +4,30 @@ from instagrapi import Client
 from concurrent.futures import ThreadPoolExecutor
 
 
-def process_profile(account):
+def process_likers(account, cl=Client()):
+    try:
+        matching_users = set()
+        cl.login(account["login"], account["password"])
+        print(f'Successful account login {account["login"]}!')
+
+        media_pk = cl.media_pk_from_url(account["post_url"])
+
+        likers = cl.media_likers(media_pk)
+        likers_info = [cl.user_info_by_username_v1(liker_info.username) for liker_info in likers]
+
+        for user_info in likers_info:
+            if account["keyword"].lower() in user_info.biography.lower():
+                matching_users.add(user_info.username)
+
+    except Exception as err:
+        error_text = (f'Error for account {account["login"]}: {err}')
+        print(error_text)
+        result_filename = f'{account["login"]}_results.txt'
+
+        with open(result_filename, 'w') as result_file:
+            result_file.write("error_text\n")
+
+def process_profile(account, cl=Client()):
     cl = Client()
     try:
         cl.login(account["login"], account["password"])
@@ -16,7 +39,7 @@ def process_profile(account):
         matching_users = set()
 
         likers = cl.media_likers(media_pk)
-        likers_info = [cl.user_info_by_username(liker_info.username) for liker_info in likers]
+        likers_info = [cl.user_info_by_username_v1(liker_info.username) for liker_info in likers]
 
         for user_info in likers_info:
             if account["keyword"].lower() in user_info.biography.lower():
@@ -64,7 +87,9 @@ def main():
     filename = 'data/accounts.json'
     accounts = read_accounts_from_file(filename)
 
-    with ThreadPoolExecutor(max_workers=10) as executor:
+    max_workers= input('Enter the number of accounts that will work')
+
+    with ThreadPoolExecutor(max_workers=max_workers) as executor:
         futures = [executor.submit(process_profile, account) for account in accounts]
 
         for future in futures:
