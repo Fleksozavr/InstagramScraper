@@ -128,6 +128,7 @@ def read_accounts_from_file(filename):
                 "postlink": account_data.get("postlink")
             }
             accounts.append(account)
+            return accounts
 
 
 def main():
