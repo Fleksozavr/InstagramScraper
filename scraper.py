@@ -1,7 +1,6 @@
 import json
 import os
 from instagrapi import Client
-from concurrent.futures import ThreadPoolExecutor
 
 
 def login_and_get_post(cl, account):
@@ -77,7 +76,6 @@ def process_comments(account, cl):
 
 
 def process_profile(account, cl):
-    cl = Client()
     try:
         cl.login(account["login"], account["password"])
         print(f'Успешный вход в аккаунт {account["login"]}!')
@@ -136,17 +134,19 @@ def main():
     filename = 'data/accounts.json'
     accounts = read_accounts_from_file(filename)
 
-    max_workers= input('Enter the number of accounts that will work')
     print("=================================")
     print('Выберите действие:\n 1 - Поиск лайкнувших\n 2 - Поиск комментаторов\n 3 - 1 и 2 пункт (unstable) ')
-    chouce = input('Your choice: ')
+    choice = input('Your choice: ')
     print("=================================")
-
-    with ThreadPoolExecutor(max_workers=max_workers) as executor:
-        futures = [executor.submit(process_profile, account) for account in accounts]
-
-        for future in futures:
-            future.result()
+    if choice == 1:
+        print('The process_likers function has been run.')
+        process_likers(accounts, cl=Client())
+    elif choice == 2:
+        print('')
+        process_comments(accounts, cl=Client())
+    elif choice == 3:
+        print('')
+        process_profile(accounts, cl=Client())
 
 
 if __name__ == "__main__":
