@@ -48,22 +48,20 @@ def process_profile(account):
 
 def read_accounts_from_file(filename):
     accounts = []
-    file_path = os.path.join(os.path.dirname(__file__), filename)
-    with open(file_path, 'r') as file:
-        for line in file:
-            account_info = line.strip().split(',')
+    with open(filename, 'r') as accounts_file:
+        data = json.load(accounts_file)
+        for account_data in data:
             account = {
-                "login": account_info[0],
-                "password": account_info[1],
-                "keyword": account_info[2],
-                "post_url": account_info[3]
+                "login": account_data.get("login"),
+                "password": account_data.get("password"),
+                "keyword": account_data.get("keyword"),
+                "postlink": account_data.get("postlink")
             }
             accounts.append(account)
-    return accounts
 
 
 def main():
-    filename = 'data/accounts.txt'
+    filename = 'data/accounts.json'
     accounts = read_accounts_from_file(filename)
 
     with ThreadPoolExecutor(max_workers=10) as executor:
