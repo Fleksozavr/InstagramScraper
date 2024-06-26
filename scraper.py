@@ -4,13 +4,20 @@ from instagrapi import Client
 from concurrent.futures import ThreadPoolExecutor
 
 
-def process_likers(account, cl=Client()):
-    try:
-        matching_users = set()
+def login_and_get_post(cl, account):
         cl.login(account["login"], account["password"])
         print(f'Successful account login {account["login"]}!')
 
         media_pk = cl.media_pk_from_url(account["post_url"])
+
+        return(media_pk)
+
+
+def process_likers(account, cl):
+    try:
+        matching_users = set()
+        
+        media_pk = login_and_get_post(cl=Client() , account=account)
 
         likers = cl.media_likers(media_pk)
         likers_info = [cl.user_info_by_username_v1(liker_info.username) for liker_info in likers]
@@ -18,6 +25,15 @@ def process_likers(account, cl=Client()):
         for user_info in likers_info:
             if account["keyword"].lower() in user_info.biography.lower():
                 matching_users.add(user_info.username)
+
+        with open(result_filename, 'w') as result_file:
+            if matching_users:
+                print("\nНайдены совпадения среди лайкнувших. (В каталоге results)")
+                for username in matching_users:
+                    result_file.write(f"Найдено совпадение, никнейм: {username}\n")
+            else:
+                print("\nСовпадений среди лайкнувших не найдено.")
+                result_file.write("Совпадений среди лайкнувших не найдено.\n")
 
     except Exception as err:
         error_text = (f'Error for account {account["login"]}: {err}')
@@ -27,7 +43,40 @@ def process_likers(account, cl=Client()):
         with open(result_filename, 'w') as result_file:
             result_file.write("error_text\n")
 
-def process_profile(account, cl=Client()):
+
+def process_comments(account, cl):
+    try:
+        matching_users = set()
+
+        media_pk = login_and_get_post(cl=Client() , account=account)
+
+        comments = cl.media_comments(media_pk)
+        comments_info = [cl.user_info_by_username(comment.user.username) for comment in comments]
+
+        for user_info in comments_info:
+            if account["keyword"].lower() in user_info.biography.lower():
+                matching_users.add(user_info.username) 
+
+        with open(result_filename, 'w') as result_file:
+            if matching_users:
+                print("\nНайдены совпадения среди комментаторов. (В каталоге results)")
+                for username in matching_users:
+                    result_file.write(f"Найдено совпадение, никнейм: {username}\n")
+            else:
+                print("\nСовпадений среди комментаторов не найдено.")
+                result_file.write("Совпадений среди комментаторов не найдено.\n")
+        
+
+    except Exception as err:
+        error_text = (f'Error for account {account["login"]}: {err}')
+        print(error_text)
+        result_filename = f'{account["login"]}_results.txt'
+
+        with open(result_filename, 'w') as result_file:
+            result_file.write("error_text\n")
+
+
+def process_profile(account, cl):
     cl = Client()
     try:
         cl.login(account["login"], account["password"])
@@ -88,6 +137,10 @@ def main():
     accounts = read_accounts_from_file(filename)
 
     max_workers= input('Enter the number of accounts that will work')
+    print("=================================")
+    print('Выберите действие:\n 1 - Поиск лайкнувших\n 2 - Поиск комментаторов\n 3 - 1 и 2 пункт (unstable) ')
+    chouce = input('Your choice: ')
+    print("=================================")
 
     with ThreadPoolExecutor(max_workers=max_workers) as executor:
         futures = [executor.submit(process_profile, account) for account in accounts]
